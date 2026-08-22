@@ -1,0 +1,4 @@
+﻿User-agent: *
+Allow: /
+
+Sitemap: https://yaqinuz.vercel.app/sitemap.xml
