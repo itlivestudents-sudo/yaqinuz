@@ -1,11 +1,20 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CategorySelector } from './components/CategorySelector';
 import { MapView } from './components/MapView';
 import { PlacesList } from './components/PlacesList';
+import { LoginModal } from './components/LoginModal';
 import { fetchRealPlaces, fetchRealRoute } from './services/api';
 import './App.css';
 
 export default function App() {
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('yaqin_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [places, setPlaces] = useState([]);
@@ -24,6 +33,28 @@ export default function App() {
     setError(null);
     setPlaces([]);
 
+    const searchPlaces = async (coords) => {
+      setLoading(true);
+      setLoadingMessage('Eng yaqin joylar qidirilmoqda...');
+      try {
+        const fetchedPlaces = await fetchRealPlaces(category.id, coords.lat, coords.lng);
+        setPlaces(fetchedPlaces);
+        if (fetchedPlaces.length > 0) {
+          setSelectedPlace(fetchedPlaces[0]);
+        }
+      } catch (err) {
+        setError(err.message || 'Joylar ro‘yxatini yuklashda xatolik yuz berdi.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Agar foydalanuvchi joylashuvi avval aniqlangan bo'lsa, qayta kutib turmasdan darhol qidiradi
+    if (userLocation) {
+      searchPlaces(userLocation);
+      return;
+    }
+
     if (!navigator.geolocation) {
       setError('Brauzeringiz Geolocation xizmatini qo‘llab-quvvatlamaydi.');
       return;
@@ -33,25 +64,13 @@ export default function App() {
     setLoadingMessage('Joylashuvingiz aniqlanmoqda...');
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const coords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
         setUserLocation(coords);
-        setLoadingMessage('Eng yaqin haqiqiy joylar qidirilmoqda...');
-
-        try {
-          const fetchedPlaces = await fetchRealPlaces(category.id, coords.lat, coords.lng);
-          setPlaces(fetchedPlaces);
-          if (fetchedPlaces.length > 0) {
-            setSelectedPlace(fetchedPlaces[0]);
-          }
-        } catch (err) {
-          setError(err.message || 'Joylar ro‘yxatini yuklashda xatolik yuz berdi.');
-        } finally {
-          setLoading(false);
-        }
+        searchPlaces(coords);
       },
       (geoError) => {
         setLoading(false);
@@ -63,7 +82,7 @@ export default function App() {
           setError('Joylashuvni aniqlash vaqti tugadi.');
         }
       },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
     );
   };
 
@@ -112,9 +131,30 @@ export default function App() {
     setError(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('yaqin_user');
+    setUser(null);
+  };
+
   return (
     <div className="app-layout">
-      {/* 1-bosqich: Bosh sahifa (Faqat "Sizga nima kerak?" va 4 ta kategoriya) */}
+      {/* Agar foydalanuvchi tizimga kirmagan bo'lsa, Login oyna ko'rsatiladi */}
+      {!user && <LoginModal onLogin={(userData) => setUser(userData)} />}
+
+      {/* Foydalanuvchi profili va chiqish tugmasi */}
+      {user && (
+        <header className="top-user-bar">
+          <div className="user-welcome">
+            <span className="user-icon">👤</span>
+            <span>Salom, <strong>{user.name}</strong></span>
+          </div>
+          <button type="button" onClick={handleLogout} className="logout-btn" title="Chiqish">
+            Chiqish 🚪
+          </button>
+        </header>
+      )}
+
+      {/* 1-bosqich: Bosh sahifa (Faqat "Sizga nima kerak?" va kategoriyalar) */}
       {!selectedCategory && (
         <main className="main-center">
           <CategorySelector onSelectCategory={handleSelectCategory} />
@@ -156,7 +196,7 @@ export default function App() {
             category={selectedCategory}
             places={places}
             selectedPlace={selectedPlace}
-            routeData={routeData}
+            routeData={routeData ? { ...routeData, userLat: userLocation?.lat, userLng: userLocation?.lng } : { userLat: userLocation?.lat, userLng: userLocation?.lng }}
             loadingRoute={loadingRoute}
             onSelectPlace={handleSelectPlace}
             onShowRoute={handleShowRoute}

@@ -41,6 +41,10 @@ function getDefaultCategoryName(category) {
       return 'Kafe';
     case 'fuel':
       return 'Yoqilg‘i shoxobchasi';
+    case 'mosque':
+      return 'Masjid';
+    case 'bank':
+      return 'Bank';
     default:
       return 'Joy';
   }
@@ -56,7 +60,7 @@ async function runOverpassQuery(query) {
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -84,7 +88,9 @@ async function fetchNominatimPlaces(category, lat, lng, delta = 0.08) {
     shop: 'q=supermarket',
     pharmacy: 'amenity=pharmacy',
     cafe: 'amenity=cafe',
-    fuel: 'amenity=fuel'
+    fuel: 'amenity=fuel',
+    mosque: 'amenity=place_of_worship',
+    bank: 'amenity=bank'
   };
 
   const param = queryParams[category] || 'q=' + encodeURIComponent(category);
@@ -146,6 +152,18 @@ export async function fetchRealPlaces(category, lat, lng, radius = 4000) {
     tagQuery = `
       node["amenity"="fuel"](around:${radius}, ${lat}, ${lng});
       way["amenity"="fuel"](around:${radius}, ${lat}, ${lng});
+    `;
+  } else if (category === 'mosque') {
+    tagQuery = `
+      node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius}, ${lat}, ${lng});
+      way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius}, ${lat}, ${lng});
+      node["amenity"="place_of_worship"](around:${radius}, ${lat}, ${lng});
+      way["amenity"="place_of_worship"](around:${radius}, ${lat}, ${lng});
+    `;
+  } else if (category === 'bank') {
+    tagQuery = `
+      node["amenity"~"bank|atm"](around:${radius}, ${lat}, ${lng});
+      way["amenity"~"bank|atm"](around:${radius}, ${lat}, ${lng});
     `;
   }
 

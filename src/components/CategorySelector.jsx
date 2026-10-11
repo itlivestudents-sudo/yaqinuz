@@ -5,6 +5,8 @@ const CATEGORIES = [
   { id: 'pharmacy', label: 'Dorixona', icon: '💊' },
   { id: 'cafe', label: 'Kafe', icon: '☕' },
   { id: 'fuel', label: 'Yoqilg‘i', icon: '⛽' },
+  { id: 'mosque', label: 'Masjid', icon: '🕌' },
+  { id: 'bank', label: 'Bank / Bankomat', icon: '🏦' },
 ];
 
 export function CategorySelector({ onSelectCategory }) {

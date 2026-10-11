@@ -59,14 +59,29 @@ export function PlacesList({
             <span className="selected-dist">{selectedPlace.formattedDistance}</span>
           </div>
 
-          <button
-            type="button"
-            className="show-route-btn"
-            disabled={loadingRoute}
-            onClick={() => onShowRoute(selectedPlace)}
-          >
-            {loadingRoute ? 'Yo‘l hisoblanmoqda...' : 'Yo‘lni ko‘rsatish'}
-          </button>
+          <div className="action-buttons-group">
+            <button
+              type="button"
+              className="show-route-btn"
+              disabled={loadingRoute}
+              onClick={() => onShowRoute(selectedPlace)}
+            >
+              {loadingRoute ? 'Yo‘l hisoblanmoqda...' : '📍 Xaritada ko‘rish'}
+            </button>
+
+            {/* Google Maps Piyoda navigatsiyasi */}
+            <div className="external-nav-group">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.lat},${selectedPlace.lon}&travelmode=walking`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-action-btn walking-btn"
+                title="Piyoda marshrut"
+              >
+                🚶 Piyoda yo‘l (Google Maps)
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
