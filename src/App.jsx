@@ -3,7 +3,6 @@ import { CategorySelector } from './components/CategorySelector';
 import { MapView } from './components/MapView';
 import { PlacesList } from './components/PlacesList';
 import { LoginModal } from './components/LoginModal';
-import { MusicPlayer } from './components/MusicPlayer';
 import { fetchRealPlaces, fetchRealRoute } from './services/api';
 import './App.css';
 
@@ -142,7 +141,7 @@ export default function App() {
       {/* Agar foydalanuvchi tizimga kirmagan bo'lsa, Login oyna ko'rsatiladi */}
       {!user && <LoginModal onLogin={(userData) => setUser(userData)} />}
 
-      {/* Foydalanuvchi profili, musiqa pleeri va chiqish tugmasi */}
+      {/* Foydalanuvchi profili va chiqish tugmasi */}
       {user && (
         <header className="top-user-bar">
           <div className="user-welcome">
@@ -150,12 +149,9 @@ export default function App() {
             <span>Salom, <strong>{user.name}</strong></span>
           </div>
 
-          <div className="top-bar-right">
-            <MusicPlayer />
-            <button type="button" onClick={handleLogout} className="logout-btn" title="Chiqish">
-              Chiqish 🚪
-            </button>
-          </div>
+          <button type="button" onClick={handleLogout} className="logout-btn" title="Chiqish">
+            Chiqish 🚪
+          </button>
         </header>
       )}
 
