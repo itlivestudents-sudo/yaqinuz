@@ -1,46 +1,98 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 
-// Sof instrumental, odam ovozisiz sokin fortepiano va tabiat kuylari
-const MUSIC_URL = 'https://cdn.pixabay.com/download/audio/2022/11/06/audio_24a2c5b3c3.mp3?filename=relaxing-piano-music-24892.mp3';
-
+// Web Audio API orqali generatsiya qilinadigan 100% kafolatlangan sokin meditatsion kuy (Pianino va Ambient)
 export function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.3); // Pastroq, yoqimli fon ovozi
-  const audioRef = useRef(null);
+  const [volume, setVolume] = useState(0.3);
+  const audioCtxRef = useRef(null);
+  const gainNodeRef = useRef(null);
+  const timerRef = useRef(null);
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
+  const startCalmSynthMusic = () => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioContext();
+      audioCtxRef.current = ctx;
+
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(volume, ctx.currentTime);
+      masterGain.connect(ctx.destination);
+      gainNodeRef.current = masterGain;
+
+      // Sokin akkordlar (Pentatonika: tinchlantiruvchi, sokin tovushlar)
+      const calmScale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 659.25]; // C4, D4, E4, G4, A4, C5, E5
+
+      const playCalmTone = () => {
+        if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') return;
+
+        const osc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+
+        // Sine to'lqin - eng mayin, sokin fortepiano/organ ohangi
+        osc.type = 'sine';
+
+        // Tasodifiy sokin nota tanlash
+        const freq = calmScale[Math.floor(Math.random() * calmScale.length)];
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        // Mayin kirib kelish va ohista so'nish (Attack & Release)
+        const now = ctx.currentTime;
+        noteGain.gain.setValueAtTime(0.001, now);
+        noteGain.gain.linearRampToValueAtTime(0.2, now + 1.2);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 4.5);
+
+        osc.connect(noteGain);
+        noteGain.connect(masterGain);
+
+        osc.start(now);
+        osc.stop(now + 4.6);
+      };
+
+      // Har 2 soniyada mayin sokin kuy notasi yangraydi
+      playCalmTone();
+      timerRef.current = setInterval(playCalmTone, 2200);
+
+      setIsPlaying(true);
+    } catch {
+      setIsPlaying(false);
     }
-  }, [volume]);
+  };
+
+  const stopMusic = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
+    }
+    setIsPlaying(false);
+  };
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
-
     if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
+      stopMusic();
     } else {
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+      startCalmSynthMusic();
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const val = parseFloat(e.target.value);
+    setVolume(val);
+    if (gainNodeRef.current && audioCtxRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(val, audioCtxRef.current.currentTime);
     }
   };
 
   return (
-    <div className="ambient-music-player" title="Sokin fon musiqasi">
-      <audio
-        ref={audioRef}
-        src={MUSIC_URL}
-        loop
-        preload="auto"
-      />
-
+    <div className="ambient-music-player" title="Sokin, tinchlantiruvchi fon kuylari">
       <button
         type="button"
         className={`music-btn ${isPlaying ? 'playing' : ''}`}
         onClick={togglePlay}
-        aria-label="Fon musiqasi"
+        aria-label="Sokin fon kuylari"
       >
         <span className="music-icon">{isPlaying ? '🔊' : '🎵'}</span>
         <span className="music-label">{isPlaying ? 'Sokin kuy: Yoqiq' : 'Sokin kuy'}</span>
@@ -60,7 +112,7 @@ export function MusicPlayer() {
           max="1"
           step="0.05"
           value={volume}
-          onChange={(e) => setVolume(parseFloat(e.target.value))}
+          onChange={handleVolumeChange}
           className="music-volume-slider"
           title={`Ovoz: ${Math.round(volume * 100)}%`}
         />
