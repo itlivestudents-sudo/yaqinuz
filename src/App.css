@@ -2,21 +2,21 @@
    YAQIN - Global & Layout Styles
    ========================================= */
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
   --primary-light: #eff6ff;
   --accent: #10b981;
-  --bg-main: #0f172a;
-  --bg-card: #1e293b;
-  --bg-card-hover: #334155;
+  --bg-main: #090d16;
+  --bg-card: rgba(18, 25, 43, 0.7);
+  --bg-card-hover: rgba(30, 41, 69, 0.85);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --border-color: #334155;
+  --border-color: rgba(255, 255, 255, 0.08);
   --danger: #ef4444;
-  --radius-lg: 18px;
-  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
   --radius-sm: 8px;
-  --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -28,6 +28,11 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(37, 99, 235, 0.18) 0px, transparent 50%),
+    radial-gradient(at 85% 85%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+  background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
   overflow-x: hidden;
@@ -52,11 +57,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
 }
 
 .home-container {
-  max-width: 520px;
+  max-width: 580px;
   width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -72,20 +77,23 @@ body {
 }
 
 .brand-logo {
-  font-size: 3.5rem;
+  font-size: 3.8rem;
   font-weight: 900;
-  letter-spacing: 1px;
-  line-height: 1.2;
-  margin-bottom: 0.6rem;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
   padding: 0.2rem 0.5rem;
+  filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.3));
 }
 
 .logo-yaqin {
-  color: #3b82f6;
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .logo-uz {
@@ -93,9 +101,10 @@ body {
 }
 
 .hero-question {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: var(--text-main);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #cbd5e1;
+  letter-spacing: 0.2px;
 }
 
 .category-grid {
@@ -106,7 +115,9 @@ body {
 }
 
 .category-card {
-  background-color: var(--bg-card);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 2rem 1.5rem;
@@ -116,16 +127,31 @@ body {
   justify-content: center;
   gap: 1rem;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text-main);
-  box-shadow: var(--shadow);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .category-card:hover {
-  transform: translateY(-4px);
-  background-color: var(--bg-card-hover);
-  border-color: #60a5fa;
-  box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.25);
+  transform: translateY(-5px);
+  background: var(--bg-card-hover);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 16px 36px -6px rgba(37, 99, 235, 0.3);
+}
+
+.category-card:hover::before {
+  opacity: 1;
 }
 
 .category-card:active {
@@ -135,12 +161,19 @@ body {
 .cat-icon {
   font-size: 3.5rem;
   line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-card:hover .cat-icon {
+  transform: scale(1.1);
 }
 
 .cat-label {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.3px;
+  color: #f1f5f9;
 }
 
 /* =========================================
