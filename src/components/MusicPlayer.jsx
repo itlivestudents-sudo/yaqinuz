@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// Sokin, tinchlantiruvchi, yoqimli lofi / ambient musiqa (Royalty-free)
-const MUSIC_URL = 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3';
+// Sof instrumental, odam ovozisiz sokin fortepiano va tabiat kuylari
+const MUSIC_URL = 'https://cdn.pixabay.com/download/audio/2022/11/06/audio_24a2c5b3c3.mp3?filename=relaxing-piano-music-24892.mp3';
 
 export function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
