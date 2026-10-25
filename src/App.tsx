@@ -694,14 +694,14 @@ export default function App() {
                       className={`mode-btn ${routeMode === 'walk' ? 'active' : ''}`}
                       onClick={() => setRouteMode('walk')}
                     >
-                      🚶 Piyoda ({calcWalkMin} daq)
+                      🚶 Piyoda ({calcWalkMin} daqiqa)
                     </button>
                     <button
                       type="button"
                       className={`mode-btn ${routeMode === 'drive' ? 'active' : ''}`}
                       onClick={() => setRouteMode('drive')}
                     >
-                      🚗 Avtomobil ({calcDriveMin} daq)
+                      🚗 Avtomobil ({calcDriveMin} daqiqa)
                     </button>
                   </div>
                 </div>
