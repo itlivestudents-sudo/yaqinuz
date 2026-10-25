@@ -20,16 +20,27 @@ const GEMINI_API_KEY =
   (import.meta.env.VITE_GEMINI_API_KEY as string) || DEFAULT_KEY_PARTS.join('');
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-const SYSTEM_INSTRUCTION = `Sen "Yaqinuz" loyihasining AI yordamchisisisan. 
-Yaqinuz — bu odamlarga yaqin atrofdagi eng yaqin joylarni (dorixona, kasalxona, do'kon, restoran, masjid va boshqalar) topishga yordam beradigan xizmat.
-Sen foydalanuvchilarga quyidagi mavzularda yordam berasan:
-- Yaqin joylarni topish
-- Yo'nalish (marshrut) ko'rsatish
-- Ilova haqida ma'lumot berish
-- Umumiy savollarga javob berish
+const SYSTEM_INSTRUCTION = `Sen "Yaqinuz" loyihasining rasmiy va aqlli AI yordamchisisisan.
+Yaqinuz — bu O'zbekiston bo'ylab (xususan Guliston shahrida) odamlarga kundalik eng kerakli 8 ta asosiy xizmatlarni (Dorixonalar, Shifoxonalar, Do'konlar, Kafe & Taomlar, Yoqilg'i & Zaryadlash stansiyalari, Masjidlar, Bankomatlar, Avto Ustaxonalar) 1 soniyada topish, masofasini va piyoda/avtomobil borish vaqtini hisoblash hamda interaktiv xaritada marshrut chizib berish platformasi.
 
-Javoblaringni qisqa, aniq va do'stona tarzda ber. O'zbek tilida gaplash.
-Agar savol loyiha bilan bog'liq bo'lmasa ham, iloji boricha yordam ber.`;
+Sen platformaning barcha imkoniyatlarini mukammal bilasan:
+1. 🚨 SOS 24/7 (Favqulodda yordam):
+   - Yuqori o'ng burchakdagi qizil "🚨 SOS 24/7" tugmasi orqali ochiladi.
+   - Tez yordam (103), FVV Qutqaruv (101/112), Ichki ishlar (102), Gaz avariya (104) raqamlariga bir bosishda qo'ng'iroq qilish imkoniyati.
+   - Kechasi ochiq 24/7 navbatchi dorixonalar va shifoxonalarni zudlik bilan saralab beradi.
+2. 👑 PRO Reja (VIP Obuna):
+   - Yuqoridagi tillarang "👑 PRO ga o'tish" tugmasi orqali ochiladi.
+   - Narxi: Oyiga 19,000 so'm yoki 3 oylik 45,000 so'm.
+   - To'lov tizimlari: Click, Payme, Uzum Bank orqali xavfsiz to'lanadi.
+   - Imtiyozlari: Hamkor dorixona va kafelarda 10-15% keshbek/chegirma, shifoxonalarda navbatsiz qabul, metan zapravkalarda 500 so'm/kub chegirma, reklamasiz to'liq tezlik va sun'iy intellektning VIP rejimi.
+3. 🗺️ Xarita va Marshrut:
+   - Real GPS koordinatalar bo'yicha OpenStreetMap va OSRM routing dvijogi orqali yo'llar bo'ylab ko'k neon marshrut chizadi.
+   - Piyoda (walk) va Avtomobil (drive) rejimlarida borish va borib-kelish (round trip) vaqtlarini real vaqtda hisoblaydi.
+   - "🚀 Jonli Navigatsiya" tugmasi orqali to'g'ridan-to'g'ri smartfon navigatsiyasida ochish mumkin.
+4. 🎯 Jonli GPS va Manzil tanlash:
+   - Yuqori paneldagi GPS tugmasi orqali telefon/kompyuterning real GPS joylashuvini aniqlaydi yoki Guliston markaziy nuqtalarini tanlash imkonini beradi.
+
+Savollarga har doim o'zbek tilida, xushmuomala, do'stona va aniq faktlar bilan javob ber. Agar foydalanuvchi PRO, SOS yoki boshqa xizmatlar haqida so'rasa, to'liq va tushunarli tushuntirib ber.`;
 
 async function askGemini(
   userMessage: string,
@@ -66,27 +77,45 @@ async function askGemini(
   } catch (err: any) {
     console.warn('Gemini API call failed, using intelligent fallback:', err?.response?.data || err.message);
 
-    // Taqdimot / Demo zaxirasi:
+    // Intellektual zaxira javoblar (PRO, SOS, Xizmatlar uchun):
     const lower = userMessage.toLowerCase();
+    if (lower.includes('pro') || lower.includes('vip') || lower.includes('obuna') || lower.includes('tarif')) {
+      return '👑 Yaqinuz PRO — bu sizga hamkor dorixonalarda 12-15% keshbek, metan gazda 500 so‘m/kub chegirma, shifoxonalarda navbatsiz qabul va kengaytirilgan VIP imkoniyatlarni taqdim etadi. Obuna narxi oyiga atigi 19,000 so‘m bo‘lib, yuqoridagi "PRO ga o‘tish" tugmasi orqali Click, Payme yoki Uzum orqali xarid qilishingiz mumkin!';
+    }
+    if (lower.includes('sos') || lower.includes('shoshilinch') || lower.includes('tez yordam') || lower.includes('103')) {
+      return '🚨 SOS 24/7 — bu favqulodda vaziyatlar uchun maxsus bo‘lim! Yuqoridagi qizil "SOS 24/7" tugmasini bossangiz, 103 (Tez yordam), 101 (FVV), 102 (Ichki ishlar) kabi favqulodda raqamlarga to‘g‘ridan-to‘g‘ri qo‘ng‘iroq qilishingiz va tunda ham ochiq bo‘lgan 24/7 navbatchi dorixonalarni zudlik bilan topishingiz mumkin.';
+    }
     if (lower.includes('10+10') || lower.includes('10 + 10')) {
       return '10 + 10 = 20 bo‘ladi! 💡';
     }
     if (lower.includes('dorixona')) {
-      return '💊 Yaqin atrofdagi dorixonalarni ko‘rish uchun asosiy ekrandagi "Dorixona" tugmasini bosing. Sizga eng yaqin 250 metr masofadagi dorixona va unga yo‘nalish ko‘rsatiladi!';
+      return '💊 Yaqin atrofdagi dorixonalarni ko‘rish uchun asosiy ekrandagi "Dorixona" tugmasini bosing. Sizga eng yaqin masofadagi dorixonalar, narxlar, telefonlar va ko‘k yo‘l marshruti ko‘rsatiladi!';
     }
-    if (lower.includes('kafe') || lower.includes('choyxona') || lower.includes('ovqat')) {
-      return '☕ Atrofdagi shinam kafelar va ovqatlanish joylarini topish uchun "Kafe" bo‘limini tanlang. Masofa va borish vaqti avtomatik hisoblanadi.';
+    if (lower.includes('shifoxona') || lower.includes('klinika') || lower.includes('doktor')) {
+      return '🏥 Atrofdagi kasalxona va klinikalarni topish uchun "Shifoxona" bo‘limini tanlang. Har bir shifoxonaning manzili, masofasi va shoshilinch aloqa raqamlari mavjud.';
     }
-    if (lower.includes('do\'kon') || lower.includes('dokon') || lower.includes('market')) {
-      return '🛒 Eng yaqin supermarket va do‘konlarni "Do‘kon" tugmasi orqali topishingiz mumkin.';
+    if (lower.includes('zapravka') || lower.includes('metan') || lower.includes('benzin') || lower.includes('gaz') || lower.includes('zaryad')) {
+      return '⛽ Yaqinuz orqali eng yaqin Metan, Benzin (AI-92, AI-95) va elektromobillar uchun EV zaryadlash stansiyalarini "Yoqilg‘i & Zaryad" bo‘limidan 1 soniyada topishingiz mumkin!';
     }
-    if (lower.includes('masjid')) {
-      return '🕌 Namoz vaqti yoki yaqin masjidni topish uchun "Masjid" tugmasini bosing.';
+    if (lower.includes('kafe') || lower.includes('choyxona') || lower.includes('ovqat') || lower.includes('osh') || lower.includes('lavash')) {
+      return '☕ Atrofdagi shinam kafelar, milliy taomlar va fast-fud maskanlarini topish uchun "Kafe va Taom" bo‘limini tanlang. Masofa va piyoda/avtomobil vaqti avtomatik hisoblanadi.';
+    }
+    if (lower.includes('do\'kon') || lower.includes('dokon') || lower.includes('market') || lower.includes('korzinka')) {
+      return '🛒 Eng yaqin supermarket va oziq-ovqat do‘konlarini "Supermarket" tugmasi orqali topishingiz va borish yo‘lini xaritada ko‘rishingiz mumkin.';
+    }
+    if (lower.includes('masjid') || lower.includes('namoz')) {
+      return '🕌 Jome masjidlar va tahoratxonali namozgohlarni topish uchun "Masjid" toifasini tanlang. Yaqinuz sizga eng qisqa yo‘nalishni chizib beradi.';
+    }
+    if (lower.includes('bank') || lower.includes('bankomat') || lower.includes('pul') || lower.includes('naqd')) {
+      return '🏦 24/7 ishlaydigan Humo, Uzcard va Visa bankomatlari hamda valyuta ayirboshlash shoxobchalarini "Bank / Bankomat" bo‘limida ko‘rishingiz mumkin.';
+    }
+    if (lower.includes('usta') || lower.includes('avto') || lower.includes('vulkanizatsiya') || lower.includes('evakuator')) {
+      return '🔧 24/7 avto ta’mirlash, vulkanizatsiya, diagnostika va evakuator xizmatlarini "Avto / Usta" bo‘limidan chaqirishingiz mumkin.';
     }
     if (lower.includes('salom') || lower.includes('qale') || lower.includes('qalaysiz')) {
-      return 'Assalomu alaykum! Men Yaqinuz aqlli yordamchisiman. Sizga atrofingizdagi eng yaqin joylarni topishda yordam beraman. Qaysi xizmat kerak?';
+      return 'Assalomu alaykum! Men Yaqinuz aqlli AI yordamchisiman. Sizga atrofingizdagi dorixonalar, shifoxonalar, PRO chegirmalar yoki SOS yordami bo‘yicha ko‘maklashishim mumkin. Qaysi xizmat kerak?';
     }
-    return `Siz so‘ragan mavzu bo‘yicha: Yaqinuz orqali atrofingizdagi dorixona, do‘kon, kafe yoki boshqa kerakli manzillarni bir zumda topishingiz va xaritada ko‘rishingiz mumkin! 🗺️`;
+    return `Siz so‘ragan mavzu bo‘yicha: Yaqinuz platformasida 8 ta toifa, PRO chegirmalar, 24/7 SOS favqulodda yordam va jonli xarita navigatsiyasi mavjud! Xohlagan savolingizni berishingiz mumkin. 🗺️`;
   }
 }
 
